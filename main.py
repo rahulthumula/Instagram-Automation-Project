@@ -19,7 +19,16 @@ def send_dm_to_commenters(post_url, message):
     except Exception as e:
         raise ValueError(f"Failed to log in with the provided credentials: {e}")
 
-    media_id = cl.media_pk_from_url(post_url)
+    try:
+        media_id = cl.media_pk_from_url(post_url)
+    except Exception as e:
+        print(f"Failed to retrieve the post: {e}")
+        return
+
+    if not media_id:
+        print("The post does not exist or the URL is invalid.")
+        return
+
     comments = cl.media_comments(media_id)
     dm_sent_users = set()
 
@@ -35,7 +44,8 @@ def send_dm_to_commenters(post_url, message):
                 with open("dm_log.txt", "a") as log_file:
                     log_file.write(f"DM sent to {comment.user.username}\n")
                 
-                time.sleep(2)  
+                time.sleep(2)  # Adjust sleep time based on Instagram's rate limits
+
             except Exception as e:
                 print(f"Failed to send DM to {comment.user.username}: {e}")
                 with open("dm_log.txt", "a") as log_file:
@@ -45,5 +55,5 @@ def send_dm_to_commenters(post_url, message):
 
 if __name__ == "__main__":
     post_url = "https://www.instagram.com/p/CRO6ZSCtsdD/"
-    message = "Hello"
+    message = "Thank you for commenting on our post! We appreciate your support."
     send_dm_to_commenters(post_url, message)
